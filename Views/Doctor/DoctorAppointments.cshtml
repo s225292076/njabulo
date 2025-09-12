@@ -1,0 +1,52 @@
+﻿@model IEnumerable<Appointment>
+
+@{
+    ViewData["Title"] = "My Appointments";
+}
+
+<h2 class="mb-4">My Appointments</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">You have no scheduled appointments.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-success">
+            <tr>
+                <th>Patient Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>ID Number</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var appt in Model)
+            {
+                <tr>
+                    <td>@appt.FullName</td>
+                    <td>@appt.Age</td>
+                    <td>@appt.Gender</td>
+                    <td>@appt.IdNumber</td>
+                    <td>@appt.PreferredDate.ToString("yyyy-MM-dd")</td>
+                    <td>@appt.PreferredTime.ToString(@"hh\:mm")</td>
+                    <td>@appt.Reason</td>
+                    <td>@appt.Status</td>
+                    <td>
+                        <!-- Schedule Follow-Up button -->
+                        <form asp-controller="Doctor" asp-action="ScheduleFollowUp" method="get" class="d-inline">
+                            <input type="hidden" name="appointmentId" value="@appt.AppointmentId" />
+                            <button type="submit" class="btn btn-outline-success btn-sm">Follow-Up</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

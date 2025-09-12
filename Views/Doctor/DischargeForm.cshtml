@@ -1,0 +1,23 @@
+﻿@model Ward_Management_System.Models.Appointment
+
+@{
+    ViewData["Title"] = "Discharge Patient";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Discharge Instructions for @Model.FullName</h2>
+
+    <form asp-action="MarkReadyForDischarge" asp-route-id="@Model.AppointmentId" method="post">
+        <div class="form-group">
+            <label for="dischargeSummary">Discharge Summary</label>
+            <textarea id="dischargeSummary" name="dischargeSummary" class="form-control" rows="4"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-warning mt-3">
+            Mark as Ready To Be Discharged
+        </button>
+    </form>
+</div>
+
+

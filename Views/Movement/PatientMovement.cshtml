@@ -1,0 +1,83 @@
+﻿@model Ward_Management_System.ViewModels.PatientMovementViewModel
+@{
+    ViewData["Title"] = "Patient Movement Tracking";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Patient Movement Tracking</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4>@Model.PatientName</h4>
+            @* <p><strong>ID Number:</strong> @Model.AdmissionId</p> *@
+            <p>
+                <strong>Current Location:</strong>
+                <span class="badge bg-primary fs-6">@Model.CurrentLocation</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Movement Timeline -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Movement History</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+            @foreach (var move in Model.MovementHistory)
+            {
+                <li class="list-group-item">
+                    <strong>@move.LocationName</strong>
+                    <span class="text-muted">(@move.MovementTime.ToString("dd MMM yyyy HH:mm"))</span>
+                    @if (!string.IsNullOrEmpty(move.Notes))
+                    {
+                        <div class="text-muted small">Note: @move.Notes</div>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+
+    <!-- Move Patient Button -->
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#movePatientModal">
+        Move Patient
+    </button>
+</div>
+
+<!-- Move Patient Modal -->
+<div class="modal fade" id="movePatientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="MovePatient" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Move Patient</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="AdmissionID" value="@Model.AdmissionId" />
+
+                    <div class="mb-3">
+                        <label for="LocationID" class="form-label">Select New Location</label>
+                        <select class="form-select" id="WardId" name="WardId" required>
+                            <option value="">-- Select Location --</option>
+                            @foreach (var loc in Model.AvailableWards)
+                            {
+                                <option value="@loc.WardId">@loc.WardName</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Notes" class="form-label">Notes (optional)</label>
+                        <textarea class="form-control" id="Notes" name="Notes" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Confirm Move</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

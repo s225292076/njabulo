@@ -1,0 +1,98 @@
+﻿@using Ward_Management_System.ViewModels
+@model AppointmentBookingDetailsVM
+
+@{
+    ViewData["Title"] = "Schedule Follow-Up";
+}
+
+<h2 class="mb-3">Schedule Follow-Up Appointment</h2>
+
+<form asp-action="ScheduleFollowUp" method="post">
+    @Html.AntiForgeryToken()
+
+    <!-- Hidden values -->
+    <input type="hidden" asp-for="UserId" />
+    <input type="hidden" asp-for="DoctorId" />
+    <input type="hidden" asp-for="FullName" />
+    <input type="hidden" asp-for="Age" />
+    <input type="hidden" asp-for="Gender" />
+    <input type="hidden" asp-for="IdNumber" />
+
+    <div class="card p-3 shadow-sm rounded">
+        <h4 class="mb-3">Patient Information</h4>
+        <p><strong>Name:</strong> @Model.FullName</p>
+        <p><strong>Age:</strong> @Model.Age</p>
+        <p><strong>Gender:</strong> @Model.Gender</p>
+        <p><strong>ID Number:</strong> @Model.IdNumber</p>
+    </div>
+
+    <div class="mt-4 card p-3 shadow-sm rounded">
+        <h4 class="mb-3">Follow-Up Details</h4>
+
+        <div class="mb-3">
+            <label asp-for="PreferredDate" class="form-label"></label>
+            <input asp-for="PreferredDate" type="date" class="form-control" id="preferredDate" />
+            <span asp-validation-for="PreferredDate" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="PreferredTime" class="form-label"></label>
+            <input asp-for="PreferredTime" type="time" class="form-control" id="preferredTime" />
+            <span asp-validation-for="PreferredTime" class="text-danger"></span>
+            <small class="text-muted" id="slotWarning"></small>
+        </div>
+
+       @*  <div class="mb-3">
+            <label asp-for="WardId" class="form-label">Ward</label>
+            <select asp-for="WardId" class="form-select" asp-items="@(new SelectList(ViewBag.Wards, "WardId", "WardName"))">
+                <option value="">-- Select Ward --</option>
+            </select>
+            <span asp-validation-for="WardId" class="text-danger"></span>
+        </div> *@
+
+        <div class="mb-3">
+            <label asp-for="Reason" class="form-label"></label>
+            <textarea asp-for="Reason" class="form-control" rows="3" placeholder="Reason for follow-up (optional)"></textarea>
+            <span asp-validation-for="Reason" class="text-danger"></span>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Schedule Follow-Up</button>
+    <a asp-action="DoctorAppointments" class="btn btn-secondary mt-3">Cancel</a>
+</form>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dateInput = document.getElementById("preferredDate");
+            const timeInput = document.getElementById("preferredTime");
+            const warning = document.getElementById("slotWarning");
+            const doctorId = "@Model.DoctorId";
+
+            async function checkSlot() {
+                const date = dateInput.value;
+                const time = timeInput.value;
+
+                if (!date || !time) return;
+
+                const response = await fetch(/Appointments/GetTakenSlots?doctorId=${doctorId}&date=${date});
+                const takenSlots = await response.json();
+
+                if (takenSlots.includes(time)) {
+                    warning.textContent = "⚠ This time slot is already booked!";
+                    warning.classList.add("text-danger");
+                } else {
+                    warning.textContent = "✔ This time slot is available.";
+                    warning.classList.remove("text-danger");
+                    warning.classList.add("text-success");
+                }
+            }
+
+            dateInput.addEventListener("change", checkSlot);
+            timeInput.addEventListener("change", checkSlot);
+        });
+    </script>
+}
+

@@ -1,0 +1,65 @@
+﻿@model Ward_Management_System.ViewModels.PatientMovementFilterViewModel
+@{
+    ViewData["Title"] = "Patient Movement History";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Patient Movement History</h2>
+
+    <!-- Filter Form -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <input type="text" name="PatientName" value="@Model.PatientName"
+                   class="form-control" placeholder="Patient Name" />
+        </div>
+        <div class="col-md-3">
+            <select name="WardId" class="form-select">
+                <option value="">-- Select Ward --</option>
+                @foreach (var ward in Model.AvailableWards)
+                {
+                    <option value="@ward.WardId"
+                            selected="@(Model.WardId == ward.WardId ? "selected" : null)">
+                        @ward.WardName
+                    </option>
+
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="FromDate" value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="ToDate" value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-info w-100 text-white">Filter</button>
+        </div>
+    </form>
+
+    <!-- Results Table -->
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Patient Name</th>
+                <th>Admission ID</th>
+                <th>Ward</th>
+                <th>Movement Time</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var move in Model.Movements)
+            {
+                <tr>
+                    <td>@move.PatientName</td>
+                    <td>@move.AdmissionId</td>
+                    <td>@move.WardName</td>
+                    <td>@move.MovementTime.ToString("dd MMM yyyy HH:mm")</td>
+                    <td>@move.Notes</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

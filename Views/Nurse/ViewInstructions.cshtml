@@ -1,0 +1,68 @@
+﻿@model List<Ward_Management_System.ViewModels.PatientsLatestTreatmentVM>
+@{
+    ViewData["Title"] = "View Instructions";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<div class="container-fluid patient-dashboard py-5">
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-10 text-center">
+            <h2 class="fw-bold text-primary">List Of  Patients</h2>
+            <p class="text-muted">View all patient and their doctors instructions.</p>
+        </div>
+    </div>
+
+    <table class="table table-hover shadow-sm align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>ID Number</th>
+                <th>Age</th>
+                <th>Gender</th>
+				<th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var patient in Model)
+            {
+                <tr>
+                    <td>@patient.FullName</td>
+                    <td>@patient.IdNumber</td>
+					<td>@patient.Age</td>
+                    <td>@patient.Gender</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#instructionsModal_@patient.AppointmentId">
+                            View
+                        </button>
+
+                    </td>
+                 </tr>
+
+                <!-- Modal -->
+                <div class="modal fade" id="instructionsModal_@patient.AppointmentId" tabindex="-1" aria-labelledby="label_@patient.AppointmentId" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content shadow-sm">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title" id="label_@patient.AppointmentId">Latest Instruction for @patient.FullName</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                @if (!string.IsNullOrEmpty(patient.Procedure))
+                                {
+                                    <p><strong>Date:</strong> @patient.TreatmentDate?.ToString("dd MMM yyyy")</p>
+                                    <p><strong>Procedure:</strong> @patient.Procedure</p>
+                                    <p><strong>Instructions:</strong> @patient.Notes</p>
+                                    <p><strong>Doctor:</strong> @patient.DoctorName</p>
+                                }
+                                else
+                                {
+                                    <p class="text-muted">No instructions available.</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </tbody>
+    </table>
+</div>

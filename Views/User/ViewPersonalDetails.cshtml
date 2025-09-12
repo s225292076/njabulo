@@ -1,0 +1,155 @@
+﻿@model Ward_Management_System.ViewModels.PersonalDetailsViewModel
+
+@if (TempData["ToastMessage"] != null)
+{
+    var toastType = TempData["ToastType"] ?? "success";
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+            <div id="toastMessage" class="toast align-items-center text-bg-@toastType border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        @TempData["ToastMessage"]
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Page Heading -->
+<div class="text-center my-4">
+    <h2 class="fw-bold text-primary"><i class="bi bi-person-circle me-2"></i>User Profile</h2>
+    <p class="text-muted">Manage your personal information and emergency contacts.</p>
+</div>
+
+<!-- Profile and Details -->
+<div class="row mb-5">
+    <!-- Profile Picture & Upload -->
+    <div class="col-md-4 text-center">
+        <div class="card shadow-sm p-3">
+            <!-- Centered Image -->
+            <div class="d-flex justify-content-center mb-3">
+               <img src="@(string.IsNullOrEmpty(Model.ProfileImagePath) 
+                        ? Url.Content("~/images/placeholder.jpg") 
+                        : Url.Content(Model.ProfileImagePath))"
+                         class="img-thumbnail"
+                         alt="Profile Picture"
+                         style="width: 100%; max-width: 250px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 10px;" />
+
+            </div>
+
+            <form asp-action="UploadProfileImage" asp-controller="User" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input type="file" name="ProfileImage" class="form-control mb-2" accept="image/*" required />
+                    <button type="submit" class="btn btn-outline-primary btn-sm w-100">Upload New Photo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Personal Details -->
+    <div class="col-md-8">
+        <div class="card shadow border-info">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-person-badge-fill me-2"></i>Personal Details</h5>
+                <a asp-action="EditPersonalDetails" class="btn btn-light btn-sm">
+                    <i class="bi bi-pencil-square me-1"></i>Edit
+                </a>
+            </div>
+            <div class="card-body px-4">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Full Name:</strong> @Model.FullName</li>
+                    <li class="list-group-item"><strong>Age:</strong> @Model.Age</li>
+                    <li class="list-group-item"><strong>ID Number:</strong> @Model.IdNumber</li>
+                    <li class="list-group-item"><strong>Address:</strong> @Model.Address</li>
+                    <li class="list-group-item"><strong>Gender:</strong> @Model.Gender</li>
+                    <li class="list-group-item"><strong>Member Since:</strong> @Model.DateAdded.ToString("dd MMM yyyy")</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Emergency Contact(s) -->
+<h4 class="text-secondary mb-3"><i class="bi bi-telephone-fill me-2"></i>Emergency Contacts</h4>
+<div class="row">
+    @* Only Contact 1 exists *@
+    @if (string.IsNullOrEmpty(Model.EmergencyName2))
+    {
+        <div class="col-md-8 offset-md-2"> @* Center it and make it wider *@
+            <div class="card shadow border-warning mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="bi bi-person-lines-fill me-1"></i>Emergency Contact</h6>
+                </div>
+                <div class="card-body px-4">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Name:</strong> @Model.EmergencyName1</li>
+                        <li class="list-group-item"><strong>Phone:</strong> @Model.EmergencyPhone1</li>
+                        <li class="list-group-item"><strong>Email:</strong> @Model.EmergencyEmail1</li>
+                        <li class="list-group-item"><strong>Relationship:</strong> @Model.EmergencyRelationship1</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-6">
+            <div class="card shadow border-warning mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="bi bi-person-lines-fill me-1"></i>Emergency Contact 1</h6>
+                </div>
+                <div class="card-body px-4">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Name:</strong> @Model.EmergencyName1</li>
+                        <li class="list-group-item"><strong>Phone:</strong> @Model.EmergencyPhone1</li>
+                        <li class="list-group-item"><strong>Email:</strong> @Model.EmergencyEmail1</li>
+                        <li class="list-group-item"><strong>Relationship:</strong> @Model.EmergencyRelationship1</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow border-warning mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="bi bi-person-lines-fill me-1"></i>Emergency Contact 2</h6>
+                </div>
+                <div class="card-body px-4">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Name:</strong> @Model.EmergencyName2</li>
+                        <li class="list-group-item"><strong>Phone:</strong> @Model.EmergencyPhone2</li>
+                        <li class="list-group-item"><strong>Email:</strong> @Model.EmergencyEmail2</li>
+                        <li class="list-group-item"><strong>Relationship:</strong> @Model.EmergencyRelationship2</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+<!-- Back Button -->
+<div class="text-center mt-4">
+    <a asp-action="Index" asp-controller="User" class="btn btn-secondary px-4">
+        <i class="bi bi-arrow-left-circle me-1"></i> Back to Dashboard
+    </a>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var toastEl = document.getElementById("toastMessage");
+            if (toastEl) {
+                var toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
+        });
+    </script>
+
+}
+
+

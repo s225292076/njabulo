@@ -1,0 +1,51 @@
+﻿@model Ward_Management_System.Models.Prescription
+
+<h2>Administer Medication for Patient : @Model.Appointment?.FullName</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Medication</th>
+            <th>Schedule</th>
+            <th>Dosage</th>
+            <th>Frequency</th>
+            <th>Duration</th>
+            <th>Notes</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var med in Model.Medications)
+        {
+            var medInfo = med.Prescription.Medications
+            .FirstOrDefault(m => m.MedId == med.MedId); // adjust if joining Medications table
+
+            bool canDispense = User.IsInRole("NurseSister") ||
+            (User.IsInRole("Nurse") && med.StockMedications.Schedule <= 4);
+
+            <tr>
+                <td>@med.StockMedications.Name</td>
+                <td>@med.StockMedications.Schedule</td>
+                <td>@med.Dosage</td>
+                <td>@med.Frequency</td>
+                <td>@med.Duration</td>
+                <td>@med.Notes</td>
+                <td>
+                    @if (canDispense)
+                    {
+                        <form asp-action="AdministerMedication" method="post">
+                            <input type="hidden" name="prescribedMedicationId" value="@med.Id" />
+                            <input type="text" name="notes" placeholder="Notes" />
+                            <button type="submit" class="btn btn-success btn-sm">Dispense</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="text-danger">Not authorized</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
