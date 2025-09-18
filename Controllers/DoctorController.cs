@@ -38,7 +38,7 @@ namespace Ward_Management_System.Controllers
                                           on ad.AppointmentId equals ap.AppointmentId
                                           join w in _context.wards
                                           on ad.WardId equals w.WardId
-                                          where ad.Status != "Discharged" && ap.DoctorId == doctorId
+                                          where ad.Status == "Admitted" && ap.DoctorId == doctorId
                                           select new AdmissionViewModel
                                           {
                                               AdmissionId = ad.AdmissionId,
@@ -56,7 +56,7 @@ namespace Ward_Management_System.Controllers
 
                                           }).ToListAsync();
             var checkedInPatients = await (from a in _context.Appointments
-                                           where a.Status != "Discharged" && a.Status != "Pending"
+                                           where a.Status == "CheckedIn"
                                            && !_context.Admissions.Any(ad => ad.AppointmentId == a.AppointmentId) && a.DoctorId == doctorId
                                            join cr in _context.ConsultationRooms on a.ConsultationRoomId equals cr.RoomId
                                            select new AdmissionViewModel
@@ -524,8 +524,10 @@ namespace Ward_Management_System.Controllers
             if (doctor == null)
                 return Unauthorized();
 
+            var allowedStatuses = new[] { "Pending", "CheckedIn", "Scheduled" };
+
             var appointments = await _context.Appointments
-                .Where(a => a.DoctorId == doctor.Id)
+                .Where(a => a.DoctorId == doctor.Id && allowedStatuses.Contains(a.Status))
                 .Include(a => a.User)
                 .Include(a => a.ConsultationRoom)
                 .OrderBy(a => a.PreferredDate)
@@ -535,6 +537,49 @@ namespace Ward_Management_System.Controllers
             return View(appointments);
         }
 
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CheckOutPatient(int appointmentId)
+        {
+            // find appointment
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.AppointmentId == appointmentId);
+
+            if (appointment == null)
+            {
+                TempData["ToastMessage"] = "Appointment not found.";
+                TempData["ToastType"] = "danger";
+                return RedirectToAction("ViewAdmissions");
+            }
+
+            // free up consultation room if assigned
+            if (appointment.ConsultationRoomId.HasValue)
+            {
+                var room = await _context.ConsultationRooms
+                    .FirstOrDefaultAsync(r => r.RoomId == appointment.ConsultationRoomId);
+
+                if (room != null)
+                {
+                    room.IsAvailable = true; // free the room
+                    _context.Update(room);
+                }
+
+                //// clear the room reference
+                //appointment.ConsultationRoomId = null;
+            }
+
+            // update appointment status
+            appointment.Status = "CheckedOut";
+
+            _context.Update(appointment);
+            await _context.SaveChangesAsync();
+
+            TempData["ToastMessage"] = $"{appointment.FullName} has been checked out successfully.";
+            TempData["ToastType"] = "success";
+
+            return RedirectToAction("PatientList");
+        }
 
 
 

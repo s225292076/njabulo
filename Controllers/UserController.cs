@@ -252,6 +252,20 @@ namespace Ward_Management_System.Controllers
 
             var user = await _userManager.GetUserAsync(User);
 
+            // Check if this user already has a booking on the same day
+            bool alreadyBookedSameDay = await _context.Appointments.AnyAsync(a =>
+                a.IdNumber == (model.BookingFor == "Self" ? user.IdNumber : model.OtherPersonIdNumber)
+                && a.PreferredDate.Date == model.PreferredDate.Date
+                && a.Status != "Cancelled"); // allow booking again if the first one was cancelled
+
+            if (alreadyBookedSameDay)
+            {
+                TempData["ToastMessage"] = "You already have an appointment booked for this day.";
+                TempData["ToastType"] = "danger";
+                return RedirectToAction("ViewAppointments");
+            }
+
+
             var appointment = new Appointment
             {
                 UserId = user.Id,
