@@ -1,34 +1,62 @@
 ﻿@model IEnumerable<Ward_Management_System.Models.Prescription>
 
-<h2>Pending Prescriptions</h2>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Patient</th>
-            <th>ID Number</th>
-            <th>Doctor</th>
-            <th>Date</th>
-            <th>Items</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var p in Model)
-        {
-            <tr>
-                <td>@p.Appointment.FullName</td>
-                <td>@p.Appointment.IdNumber</td>
-                <td>@p.PrescribedBy?.FullName</td> 
-                <td>@p.PrescribedDate.ToString("yyyy-MM-dd")</td>
-                <td>@p.Medications.Count()</td>
-                <td>@(p.Medications.All(m => m.IsDispensed) ? "Completed" : "Pending")</td>
-                <td>
-                    <a asp-action="AdministerMedication" asp-route-prescriptionId="@p.PrescriptionId"
-                       class="btn btn-primary btn-sm">View & Administer</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<h2 class="mb-4 text-primary fw-bold">Pending Prescriptions</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info shadow-sm rounded-3">
+        No pending prescriptions at the moment.
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Patient</th>
+                        <th>ID Number</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        var status = p.Medications.All(m => m.IsDispensed) ? "Completed" : "Pending";
+                        <tr>
+                            <td class="fw-semibold">@p.Appointment.FullName</td>
+                            <td>@p.Appointment.IdNumber</td>
+                            <td>@p.PrescribedBy?.FullName</td>
+                            <td>@p.PrescribedDate.ToString("yyyy-MM-dd")</td>
+                            <td>@p.Medications.Count()</td>
+                            <td>
+                                @if (status == "Completed")
+                                {
+                                    <span class="badge bg-success">Completed</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="AdministerMedication"
+                                   asp-route-prescriptionId="@p.PrescriptionId"
+                                   class="btn btn-sm btn-outline-primary shadow-sm">
+                                    <i class="bi bi-capsule"></i> View & Administer
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
 

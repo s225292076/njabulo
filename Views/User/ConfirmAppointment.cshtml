@@ -7,6 +7,24 @@
     var user = await UserManager.GetUserAsync(User);
 }
 
+@{
+    int calculatedAge = 0;
+    if (!string.IsNullOrEmpty(user?.IdNumber) && user.IdNumber.Length >= 6)
+    {
+        var yearPart = int.Parse(user.IdNumber.Substring(0, 2));
+        var monthPart = int.Parse(user.IdNumber.Substring(2, 2));
+        var dayPart = int.Parse(user.IdNumber.Substring(4, 2));
+
+        var currentYear = DateTime.Now.Year % 100;
+        var century = (yearPart <= currentYear) ? 2000 : 1900;
+
+        var birthDate = new DateTime(century + yearPart, monthPart, dayPart);
+        calculatedAge = DateTime.Today.Year - birthDate.Year;
+        if (birthDate.Date > DateTime.Today.AddYears(-calculatedAge)) calculatedAge--;
+    }
+}
+
+
 <div class="container-fluid patient-dashboard py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -51,7 +69,7 @@
                                 </div>
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Age</label>
-                                    <input class="form-control" value="@user?.Age" readonly />
+                                    <input class="form-control" value="@calculatedAge" readonly />
                                 </div>
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Gender</label>

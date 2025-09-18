@@ -1,51 +1,89 @@
 ﻿@model Ward_Management_System.Models.Prescription
 
-<h2>Administer Medication for Patient : @Model.Appointment?.FullName</h2>
+<h2 class="mb-4 text-primary fw-bold">
+    Administer Medication for Patient:
+    <span class="text-dark">@Model.Appointment?.FullName</span>
+</h2>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Medication</th>
-            <th>Schedule</th>
-            <th>Dosage</th>
-            <th>Frequency</th>
-            <th>Duration</th>
-            <th>Notes</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var med in Model.Medications)
-        {
-            var medInfo = med.Prescription.Medications
-            .FirstOrDefault(m => m.MedId == med.MedId); // adjust if joining Medications table
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped mb-0 align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th>Medication</th>
+                    <th>Schedule</th>
+                    <th>Dosage</th>
+                    <th>Frequency</th>
+                    <th>Duration</th>
+                    <th>Notes</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var med in Model.Medications)
+                {
+                    bool canDispense = User.IsInRole("NurseSister") ||
+                    (User.IsInRole("Nurse") && med.StockMedications.Schedule <= 4);
 
-            bool canDispense = User.IsInRole("NurseSister") ||
-            (User.IsInRole("Nurse") && med.StockMedications.Schedule <= 4);
+                    <tr>
+                        <td class="fw-semibold">@med.StockMedications.Name</td>
+                        <td>
+                            <span class="badge bg-info text-dark">
+                                Schedule @med.StockMedications.Schedule
+                            </span>
+                        </td>
+                        <td>@med.Dosage</td>
+                        <td>@med.Frequency</td>
+                        <td>@med.Duration</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(med.Notes))
+                            {
+                                <div class="p-2 bg-light border rounded small text-muted fst-italic shadow-sm">
+                                    @med.Notes
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-secondary fst-italic">— No notes —</span>
+                            }
+                        </td>
+                        <td>
+                            @if (canDispense)
+                            {
+                                <form asp-action="AdministerMedication" method="post" class="d-flex gap-2">
+                                    <input type="hidden" name="prescribedMedicationId" value="@med.Id" />
+                                    <textarea name="notes" rows="1"
+                                      class="form-control form-control-sm rounded-3 shadow-sm stylish-notes"
+                                      placeholder="Add notes..."></textarea>
+                                    <button type="submit" class="btn btn-success btn-sm shadow-sm">
+                                        <i class="bi bi-check-circle"></i> Dispense
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Not Authorized</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 
-            <tr>
-                <td>@med.StockMedications.Name</td>
-                <td>@med.StockMedications.Schedule</td>
-                <td>@med.Dosage</td>
-                <td>@med.Frequency</td>
-                <td>@med.Duration</td>
-                <td>@med.Notes</td>
-                <td>
-                    @if (canDispense)
-                    {
-                        <form asp-action="AdministerMedication" method="post">
-                            <input type="hidden" name="prescribedMedicationId" value="@med.Id" />
-                            <input type="text" name="notes" placeholder="Notes" />
-                            <button type="submit" class="btn btn-success btn-sm">Dispense</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <span class="text-danger">Not authorized</span>
-                    }
-                </td>
-            </tr>
+<style>
+    .stylish-notes {
+        resize: none;
+        border: 1px solid #cce5ff;
+        background-color: #f9fcff;
+        transition: 0.2s;
+    }
+
+        .stylish-notes:focus {
+            border-color: #66afe9;
+            background-color: #ffffff;
+            box-shadow: 0 0 6px rgba(0,123,255,0.4);
         }
-    </tbody>
-</table>
+</style>
 

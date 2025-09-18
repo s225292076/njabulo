@@ -35,6 +35,8 @@
         </div>
     </div>
 
+
+
     <div class="row">
         <div class="col-md-10 offset-md-1">
             <div class="card shadow-sm">
@@ -61,7 +63,24 @@
                                     <tr>
                                         <td>@patient.FullName</td>
                                         <td>@patient.IdNumber</td>
-                                        <td>@patient.Age</td>
+                                        @{
+                                            int calculatedAge = 0;
+                                            if (!string.IsNullOrEmpty(patient.IdNumber) && patient.IdNumber.Length >= 6)
+                                            {
+                                                var yearPart = int.Parse(patient.IdNumber.Substring(0, 2));
+                                                var monthPart = int.Parse(patient.IdNumber.Substring(2, 2));
+                                                var dayPart = int.Parse(patient.IdNumber.Substring(4, 2));
+
+                                                var currentYear = DateTime.Now.Year % 100;
+                                                var century = (yearPart <= currentYear) ? 2000 : 1900;
+
+                                                var birthDate = new DateTime(century + yearPart, monthPart, dayPart);
+                                                calculatedAge = DateTime.Today.Year - birthDate.Year;
+                                                if (birthDate.Date > DateTime.Today.AddYears(-calculatedAge)) calculatedAge--;
+                                            }
+                                        }
+                                        <td>@calculatedAge</td>
+
                                         <td>@patient.Gender</td>
                                         <td>
                                             <a asp-action="Prescribe" asp-controller="Doctor" asp-route-id="@patient.AppointmentId" class="btn btn-sm btn-primary">

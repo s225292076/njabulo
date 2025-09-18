@@ -41,6 +41,7 @@
             <small class="text-muted" id="slotWarning"></small>
         </div>
 
+
        @*  <div class="mb-3">
             <label asp-for="WardId" class="form-label">Ward</label>
             <select asp-for="WardId" class="form-select" asp-items="@(new SelectList(ViewBag.Wards, "WardId", "WardName"))">
@@ -71,18 +72,35 @@
             const warning = document.getElementById("slotWarning");
             const doctorId = "@Model.DoctorId";
 
+            // Set today's date as min date
+            const today = new Date().toISOString().split("T")[0];
+            dateInput.min = today;
+
+            function updateMinTime() {
+                const selectedDate = dateInput.value;
+                const now = new Date();
+                const currentTime = now.toTimeString().slice(0, 5); // "HH:mm"
+
+                if (selectedDate === today) {
+                    timeInput.min = currentTime; // Only allow future times today
+                } else {
+                    timeInput.min = ""; // Reset for future days
+                }
+            }
+
             async function checkSlot() {
                 const date = dateInput.value;
                 const time = timeInput.value;
 
                 if (!date || !time) return;
 
-                const response = await fetch(/Appointments/GetTakenSlots?doctorId=${doctorId}&date=${date});
+                const response = await fetch(`/Appointments/GetTakenSlots?doctorId=${doctorId}&date=${date}`);
                 const takenSlots = await response.json();
 
                 if (takenSlots.includes(time)) {
                     warning.textContent = "⚠ This time slot is already booked!";
                     warning.classList.add("text-danger");
+                    warning.classList.remove("text-success");
                 } else {
                     warning.textContent = "✔ This time slot is available.";
                     warning.classList.remove("text-danger");
@@ -90,9 +108,17 @@
                 }
             }
 
-            dateInput.addEventListener("change", checkSlot);
+            dateInput.addEventListener("change", () => {
+                updateMinTime();
+                checkSlot();
+            });
+
             timeInput.addEventListener("change", checkSlot);
+
+            // Initialize on load
+            updateMinTime();
         });
     </script>
+
 }
 
